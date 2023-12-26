@@ -3,8 +3,10 @@ const content = document.querySelector('.main-wrapper__content');
 const navigation_text = document.querySelectorAll('.navigation a span')
 const contacts_links = document.querySelectorAll('.contacts-links a')
 
+// Номер текущей страницы
 let pageCount = 0;
 
+// Данные о каждой странице
 const dataPage = {
     0: {
         title: "Hello, i'm Dima", 
@@ -31,16 +33,16 @@ const dataPage = {
         type: "text",
     },
     3: {
-        title: "", 
-        subtitle: "",
+        title: "", // Указывается только для "text"-страниц
+        subtitle: "", // Указывается только для "text"-страниц
         background_color: "#041c24",
         color: "#d794f9",
         axes: "horisontal",
         type: "skills",
     },
     4: {
-        title: "", 
-        subtitle: "",
+        title: "", // Указывается только для "text"-страниц
+        subtitle: "", // Указывается только для "text"-страниц
         background_color: "#040d3a",
         color: "#f8b516",
         axes: "node",
@@ -55,7 +57,9 @@ const dataPage = {
         type: "text",
     },
 };
+// Данные о каждой странице
 
+// Разметка для страниц
 const markupTextPages =`
 <div class='main-wrapper__title'></div>
 <div class='main-wrapper__subtitle'></div>`;
@@ -81,12 +85,15 @@ const markupWorksPages = `
         <li class='works__item'><a>Work number 5</a></li>
     </ul>
 </div>`;
+// Разметка для страниц
 
 const maxPageCount = Object.keys(dataPage).length;
-let active_animation;
 let title = document.querySelector('.main-wrapper__title');
 let subtitle = document.querySelector('.main-wrapper__subtitle');
+let active_animation;
 
+// Прогрузка изначальных данных на странику
+// Прослушка действий пользователя (вызов функции перехода страницы)
 {
     title.innerText = dataPage[pageCount]["title"];
     subtitle.innerText = dataPage[pageCount]["subtitle"];
@@ -101,7 +108,7 @@ let subtitle = document.querySelector('.main-wrapper__subtitle');
     window.addEventListener('mousewheel', movingSiteProcessor);
     window.addEventListener('keydown', movingSiteProcessor);
 }
-
+// Основная функция реализующа переход страницы
 function movingSiteProcessor(e) {
     if (active_animation !== undefined) return
 
@@ -190,6 +197,64 @@ function movingSiteProcessor(e) {
     }, 500);
 }
 
+function movingSiteProcessorForLink(numNextPage) {
+    if (active_animation !== undefined) return
+
+    if (pageCount < numNextPage) {
+        content.classList.add(choicePath(pageCount, numNextPage));
+        if (dataPage[numNextPage]["type"] !== "text") {
+            pageCount = numNextPage;
+            setTimeout(()=>{content.innerHTML = markupProcessor(dataPage[pageCount]["type"])}, 500)
+        }
+        else if (dataPage[pageCount]["type"] !== "text" && dataPage[numNextPage]["type"] === "text"){
+            pageCount = numNextPage;
+            setTimeout(()=>{content.innerHTML = markupProcessor(dataPage[pageCount]["type"])}, 500)
+        } else {
+            pageCount = numNextPage;
+        };
+    }
+    else if (pageCount > numNextPage) {
+        content.classList.add(choicePath(pageCount, numNextPage));
+        if (dataPage[numNextPage]["type"] !== "text") {
+            pageCount = numNextPage;
+            setTimeout(()=>{content.innerHTML = markupProcessor(dataPage[pageCount]["type"])}, 500)
+        } else if (dataPage[pageCount]["type"] !== "text" && dataPage[numNextPage]["type"] === "text"){
+            pageCount = numNextPage;
+            setTimeout(()=>{content.innerHTML = markupProcessor(dataPage[pageCount]["type"])}, 500)
+        } else {
+            pageCount = numNextPage;
+        };
+    } 
+    else alert("Вы уже на этой странице");
+
+    setTimeout(()=>{
+        hello_wrapper.setAttribute("style", `color:${dataPage[pageCount]["color"]};background-color:${dataPage[pageCount]["background_color"]};`);
+        for (let element of navigation_text) {
+            element.setAttribute("style", `color:${dataPage[pageCount]["color"]}`)
+        }
+        for (let link of contacts_links) {
+            link.setAttribute("style", `color:${dataPage[pageCount]["color"]}`)
+        }
+    }, 200)
+
+    active_animation = setTimeout(()=>{
+        if (dataPage[pageCount]["type"] === "text") {
+            title = document.querySelector('.main-wrapper__title');
+            subtitle = document.querySelector('.main-wrapper__subtitle');
+            title.innerText = dataPage[pageCount]["title"];
+            subtitle.innerText = dataPage[pageCount]["subtitle"];
+        }
+        content.classList.remove("disactiveYdown");
+        content.classList.remove("disactiveYup");
+        content.classList.remove("disactiveXdown");
+        content.classList.remove("disactiveXup");
+        
+        active_animation = undefined
+    }, 500);
+}
+
+// Функция получает номер нанешней и следующей страницы
+// После чего возвращает наименование нужной анимации перехода
 function choicePath(me, next_point) {
     if (dataPage[me]["axes"] === "node" && dataPage[next_point]["axes"] === "vertical") {
         if (me > next_point) return "disactiveYup"; else return "disactiveYdown"
@@ -205,6 +270,7 @@ function choicePath(me, next_point) {
     }
 }
 
+// Функция получает тип страницы и возвращает расметку для неё
 function markupProcessor(type) {
     if (type === "text") {
         return markupTextPages;
